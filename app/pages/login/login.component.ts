@@ -1,7 +1,11 @@
-import { Component } from "@angular/core";
+import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { Router } from "@angular/router";
 
 import { Page } from "ui/page";
+import { Color } from "color";
+import { View } from "ui/core/view";
+
+import * as SocialShare from "nativescript-social-share";
 
 import { User } from "../../shared/user/user";
 import { UserService } from "../../shared/user/user.service";
@@ -13,16 +17,25 @@ import { UserService } from "../../shared/user/user.service";
   templateUrl: "pages/login/login.html",
   styleUrls: ["pages/login/login-common.css", "pages/login/login.css"]
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   user: User;
   isLoggingIn = true;
+  @ViewChild("container") container: ElementRef;
 
-  constructor(private router: Router, private userService: UserService) {
+  constructor(private router: Router, private userService: UserService, private page: Page) {
     this.user = new User();
     this.user.email = "user@nativescript.org";
     this.user.password = "password";
   }
+  ngOnInit() {
+    this.page.actionBarHidden = true;
+    this.page.backgroundImage = "res://bg_login";
+  }
   submit() {
+    if (!this.user.isValidEmail()) {
+      alert("Enter a valid email address.");
+      return;
+    }
     if (this.isLoggingIn) {
       this.login();
     } else {
@@ -50,5 +63,10 @@ export class LoginComponent {
   }
   toggleDisplay() {
     this.isLoggingIn = !this.isLoggingIn;
+    let container = <View>this.container.nativeElement;
+    container.animate({
+      backgroundColor: this.isLoggingIn ? new Color("white") : new Color("#301217"),
+      duration: 200
+    });
   }
 }
